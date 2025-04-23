@@ -1,0 +1,15 @@
+-- .luacov  (Lua, not INI)
+return {
+  statsfile  = "luacov.stats.out",
+  reportfile = "luacov.report.out",
+
+  -- collect coverage only for plugin source
+  include = {
+    "lua/",
+  },
+
+  -- ignore test helpers and specs
+  exclude = {
+    "tests/",
+  },
+}
