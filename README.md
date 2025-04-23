@@ -11,20 +11,21 @@
 
 ### Installation:
 
-- Install the `gh-dash` CLI via npm, or mark autoinstall as true in the config function
+- Install the 'gh' command line tool for your OS from [GitHub CLI](https://cli.github.com/).
+
+e.g. for macOS:
 
 ```bash
-npm install -g @openai/gh-dash
+brew install gh
 ```
 
-- Grab an API key from OpenAI and set it in your environment variables:
-  - Note: You can also set it in your `~/.bashrc` or `~/.zshrc` file to persist across sessions, but be careful with security. Especially if you share your config files.
+- Install the `gh-dash` TUI as a plugin from the `gh` command, or mark autoinstall as true in the config function
 
 ```bash
-export OPENAI_API_KEY=your_api_key
+gh extension install dlvhdr/gh-dash
 ```
 
-- Use your plugin manager, e.g. lazy.nvim:
+- Use your plugin manager to install, e.g. lazy.nvim:
 
 ```lua
 return {
@@ -46,6 +47,7 @@ return {
   },
 }
 ```
+- If you are not using Lazy, I assume you can figure out how to install the plugin yourself by cloning the repo.
 
 ### Usage:
 - Call `:gh-dash` (or `:gh-dashToggle`) to open or close the gh-dash popup.
