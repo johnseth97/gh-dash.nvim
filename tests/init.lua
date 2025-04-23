@@ -3,13 +3,13 @@
 -- luacheck: ignore async
 local async = require 'plenary.async.tests'
 
-describe('ghdash.nvim', function()
+describe('gh_dash.nvim', function()
   it('should load without errors', function()
-    require 'ghdash'
+    require 'gh_dash'
   end)
 
   it('should respond to basic command', function()
-    vim.cmd 'ghdash'
+    vim.cmd 'gh_dash'
     -- Add assertion if it triggers some output or state change
   end)
 end)

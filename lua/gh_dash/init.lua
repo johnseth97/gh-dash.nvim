@@ -8,7 +8,7 @@ local config = {
   width = 0.8,
   height = 0.8,
   cmd = { 'gh', 'dash' },
-  -- whether to auto-install the ghdash TUI not found (requires npm)
+  -- whether to auto-install the gh_dash TUI not found (requires npm)
   autoinstall = false,
 }
 
@@ -20,20 +20,20 @@ local state = {
 
 function M.setup(user_config)
   config = vim.tbl_deep_extend('force', config, user_config or {})
-  -- define commands for toggling the ghdash popup
-  vim.api.nvim_create_user_command('ghdash', function()
+  -- define commands for toggling the gh_dash popup
+  vim.api.nvim_create_user_command('GHdash', function()
     M.toggle()
-  end, { desc = 'Toggle ghdash popup' })
-  vim.api.nvim_create_user_command('ghdash-toggle', function()
+  end, { desc = 'Toggle gh-dash popup' })
+  vim.api.nvim_create_user_command('GHdashToggle', function()
     M.toggle()
-  end, { desc = 'Toggle ghdash popup (alias)' })
+  end, { desc = 'Toggle gh-dash popup (alias)' })
   -- optional keymap for toggle
   if config.keymaps.toggle then
-    vim.api.nvim_set_keymap('n', config.keymaps.toggle, '<cmd>ghdash-toggle<CR>', { noremap = true, silent = true })
+    vim.api.nvim_set_keymap('n', config.keymaps.toggle, '<cmd>GHDashToggle<CR>', { noremap = true, silent = true })
   end
 end
 
--- Create a floating window displaying the ghdash buffer
+-- Create a floating window displaying the gh_dash buffer
 local function open_window()
   -- compute dimensions and position
   local width = math.floor(vim.o.columns * config.width)
@@ -101,10 +101,10 @@ function M.open()
     -- buffer options
     vim.api.nvim_buf_set_option(state.buf, 'bufhidden', 'hide')
     vim.api.nvim_buf_set_option(state.buf, 'swapfile', false)
-    vim.api.nvim_buf_set_option(state.buf, 'filetype', 'ghdash')
-    -- map <Esc> in terminal and normal modes to close the ghdash window
-    vim.api.nvim_buf_set_keymap(state.buf, 't', '<Esc>', [[<C-\><C-n><cmd>lua require('ghdash').close()<CR>]], { noremap = true, silent = true })
-    vim.api.nvim_buf_set_keymap(state.buf, 'n', '<Esc>', [[<cmd>lua require('ghdash').close()<CR>]], { noremap = true, silent = true })
+    vim.api.nvim_buf_set_option(state.buf, 'filetype', 'gh_dash')
+    -- map <Esc> in terminal and normal modes to close the gh_dash window
+    vim.api.nvim_buf_set_keymap(state.buf, 't', '<Esc>', [[<C-\><C-n><cmd>lua require('gh_dash').close()<CR>]], { noremap = true, silent = true })
+    vim.api.nvim_buf_set_keymap(state.buf, 'n', '<Esc>', [[<cmd>lua require('gh_dash').close()<CR>]], { noremap = true, silent = true })
   end
   open_window()
   -- determine if config.cmd is a simple executable name (no args) for checking
@@ -127,52 +127,52 @@ function M.open()
           local cmd = {
             shell_cmd,
             '-c',
-            "echo 'Autoinstalling OpenAI ghdash via npm...'; npm install -g @openai/ghdash",
+            "echo 'Autoinstalling OpenAI gh_dash via npm...'; npm install -g @openai/gh_dash",
           }
           state.job = vim.fn.termopen(cmd, {
             cwd = vim.loop.cwd(),
             on_exit = function(_, exit_code)
               if exit_code == 0 then
-                vim.notify('[ghdash.nvim] ghdash CLI installed successfully', vim.log.levels.INFO)
-                -- automatically re-launch ghdash CLI now that it's installed
+                vim.notify('[gh_dash.nvim] gh_dash CLI installed successfully', vim.log.levels.INFO)
+                -- automatically re-launch gh_dash CLI now that it's installed
                 vim.schedule(function()
                   M.close()
                   state.buf = nil
                   M.open()
                 end)
               else
-                vim.notify('[ghdash.nvim] failed to install ghdash CLI', vim.log.levels.ERROR)
+                vim.notify('[gh_dash.nvim] failed to install gh_dash CLI', vim.log.levels.ERROR)
               end
               state.job = nil
             end,
           })
         end
       else
-        -- show installation instructions in the ghdash popup
+        -- show installation instructions in the gh_dash popup
         local msg = {
-          'npm not found; cannot auto-install ghdash CLI.',
+          'npm not found; cannot auto-install gh_dash CLI.',
           '',
           'Please install via your system package manager, or manually run:',
-          '  npm install -g @openai/ghdash',
+          '  npm install -g @openai/gh_dash',
         }
         vim.api.nvim_buf_set_lines(state.buf, 0, -1, false, msg)
       end
     else
       -- show instructions inline when autoinstall is disabled
       local msg = {
-        'ghdash CLI not found.',
+        'gh_dash CLI not found.',
         '',
         'Install with:',
-        '  npm install -g @openai/ghdash',
+        '  npm install -g @openai/gh_dash',
         '',
         'Or enable autoinstall in your plugin setup:',
-        '  require("ghdash").setup{ autoinstall = true }',
+        '  require("gh_dash").setup{ autoinstall = true }',
       }
       vim.api.nvim_buf_set_lines(state.buf, 0, -1, false, msg)
     end
     return
   end
-  -- spawn the ghdash CLI in the floating terminal buffer
+  -- spawn the gh_dash CLI in the floating terminal buffer
   if not state.job then
     state.job = vim.fn.termopen(config.cmd, {
       cwd = vim.loop.cwd(),
@@ -200,20 +200,20 @@ end
 
 function M.statusline()
   if state.job and not (state.win and vim.api.nvim_win_is_valid(state.win)) then
-    return '[ghdash]'
+    return '[gh_dash]'
   end
   return ''
 end
 
---- Return a lualine.nvim component for displaying ghdash status
--- Usage: table.insert(opts.sections.lualine_x, require('ghdash').status())
+--- Return a lualine.nvim component for displaying gh_dash status
+-- Usage: table.insert(opts.sections.lualine_x, require('gh_dash').status())
 function M.status()
   return {
     -- component function
     function()
       return M.statusline()
     end,
-    -- only show when ghdash job is running in background
+    -- only show when gh_dash job is running in background
     cond = function()
       return M.statusline() ~= ''
     end,
