@@ -1,4 +1,6 @@
 # gh-dash Neovim Plugin
+<img width="1477" alt="image" src="https://github.com/user-attachments/assets/84bffe05-a2c3-4bdb-9cbe-0ea0be0ea279" />
+
 
 ## A Neovim plugin integrating the open-source gh-dash TUI for the `gh` CLI ([gh-dash](https://github.com/dlvhdr/gh-dash/))
 
@@ -9,7 +11,7 @@
 - ✅ Toggle gh-dash floating window with `:GHdashToggle`
 - ✅ Optional keymap mapping via `setup` call
 - ✅ Background running when window hidden
-- ✅ Statusline integration via `require('gh_dash').status`
+- ✅ Lualine integration via `require('gh_dash').status`
 
 ### Installation
 
