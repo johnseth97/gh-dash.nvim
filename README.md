@@ -6,7 +6,7 @@
 
 ### Features
 
-- ✅ Toggle gh-dash floating window with `:GHDashToggle`
+- ✅ Toggle gh-dash floating window with `:GHdashToggle`
 - ✅ Optional keymap mapping via `setup` call
 - ✅ Background running when window hidden
 - ✅ Statusline integration via `require('gh_dash').status`
@@ -55,7 +55,7 @@ return {
 
 ### Usage
 
-- Call `:GHDash` (or `:GHDashToggle`) to open or close the gh-dash popup.
+- Call `:GHdash` (or `:GHdashToggle`) to open or close the gh-dash popup.
 -- Map your own keybindings via the `keymaps.toggle` setting.
 - Add the following code to show presence of backgrounded gh-dash window in lualine:
 

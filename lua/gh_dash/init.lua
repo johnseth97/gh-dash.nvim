@@ -29,7 +29,7 @@ function M.setup(user_config)
   end, { desc = 'Toggle gh-dash popup (alias)' })
   -- optional keymap for toggle
   if config.keymaps.toggle then
-    vim.api.nvim_set_keymap('n', config.keymaps.toggle, '<cmd>GHDashToggle<CR>', { noremap = true, silent = true })
+    vim.api.nvim_set_keymap('n', config.keymaps.toggle, '<cmd>GHdashToggle<CR>', { noremap = true, silent = true })
   end
 end
 
