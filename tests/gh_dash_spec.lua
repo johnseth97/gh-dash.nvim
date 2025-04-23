@@ -22,8 +22,8 @@ describe('gh_dash.nvim', function()
     require('gh_dash').setup { keymaps = {} }
 
     local cmds = vim.api.nvim_get_commands {}
-    assert(cmds['gh_dash'], 'gh_dash command not found')
-    assert(cmds['gh_dashToggle'], 'gh_dashToggle command not found')
+    assert(cmds['GHDash'], 'GHDash command not found')
+    assert(cmds['GHDashToggle'], 'GHDashToggle command not found')
   end)
 
   it('opens a floating terminal window', function()

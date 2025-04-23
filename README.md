@@ -1,15 +1,17 @@
 # gh-dash Neovim Plugin
 
-## A Neovim plugin integrating the open-source gh-dash TUI for the `gh` cli ([gh-dash](https://github.com/dlvhdr/gh-dash/)).
+## A Neovim plugin integrating the open-source gh-dash TUI for the `gh` CLI ([gh-dash](https://github.com/dlvhdr/gh-dash/))
+
 > Latest version: ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/johnseth97/gh-dash.nvim?sort=semver)
 
-### Features:
+### Features
+
 - ✅ Toggle gh-dash floating window with `:GHDashToggle`
 - ✅ Optional keymap mapping via `setup` call
 - ✅ Background running when window hidden
-- ✅ Statusline integration via `require('gh_dash').status()` 
+- ✅ Statusline integration via `require('gh_dash').status`
 
-### Installation:
+### Installation
 
 - Install the 'gh' command line tool for your OS from [GitHub CLI](https://cli.github.com/).
 
@@ -19,7 +21,8 @@ e.g. for macOS:
 brew install gh
 ```
 
-- Install the `gh-dash` TUI as a plugin from the `gh` command, or mark autoinstall as true in the config function
+- Install the `gh-dash` TUI as a plugin from the `gh` command
+- Alternatively, mark autoinstall as true in the config function
 
 ```bash
 gh extension install dlvhdr/gh-dash
@@ -47,12 +50,15 @@ return {
   },
 }
 ```
-- If you are not using Lazy, I assume you can figure out how to install the plugin yourself by cloning the repo.
 
-### Usage:
+- If you are not using Lazy, I assume you can figure out how to clone the repo.
+
+### Usage
+
 - Call `:GHDash` (or `:GHDashToggle`) to open or close the gh-dash popup.
 -- Map your own keybindings via the `keymaps.toggle` setting.
 - Add the following code to show presence of backgrounded gh-dash window in lualine:
+
 ```lua
 require('gh-dash').status() -- drop in to your lualine sections
 ```
