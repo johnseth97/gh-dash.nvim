@@ -9,7 +9,7 @@
 - ✅ Toggle gh-dash floating window with `:GHdashToggle`
 - ✅ Optional keymap mapping via `setup` call
 - ✅ Background running when window hidden
-- ✅ (minimal) Lualine integration via `require('gh_dash').status`
+- ✅ Lualine integration via `require('gh_dash').status`
 
 ### Installation
 
