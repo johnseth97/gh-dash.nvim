@@ -1,4 +1,4 @@
-# gh-dash Neovim Plugin
+# gh-dash.nvim
 <img width="1477" alt="image" src="https://github.com/user-attachments/assets/84bffe05-a2c3-4bdb-9cbe-0ea0be0ea279" />
 
 
