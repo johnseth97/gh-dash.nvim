@@ -116,6 +116,15 @@ function M.open()
     vim.api.nvim_buf_set_option(state.buf, 'bufhidden', 'hide')
     vim.api.nvim_buf_set_option(state.buf, 'swapfile', false)
     vim.api.nvim_buf_set_option(state.buf, 'filetype', 'gh_dash')
+    -- Escape backgrounds the window cleanly
+    -- Map <Esc> in terminal mode to hide the popup
+    vim.api.nvim_buf_set_keymap(
+      state.buf,
+      't',
+      '<Esc>',
+      [[<C-\><C-n><cmd>lua vim.defer_fn(function() require('gh_dash').toggle() end, 10)<CR>]],
+      { noremap = true, silent = true }
+    )
   end
   open_window()
   -- determine if config.cmd is a simple executable name (no args) for checking
@@ -206,8 +215,14 @@ end
 
 function M.toggle()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
-    M.close()
+    -- HIDE the window (don't kill the job)
+    vim.api.nvim_win_close(state.win, true)
+    state.win = nil
+  elseif state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+    -- Reopen window into existing buffer
+    open_window()
   else
+    -- Full open if everything is gone
     M.open()
   end
 end
