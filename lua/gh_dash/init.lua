@@ -1,10 +1,18 @@
-local vim = vim
-
 local M = {}
 
 local config = {
   keymaps = {},
   border = 'single',
+  custom_border = {
+    {}, -- Top left corner
+    {}, -- Top side
+    {}, -- Top right corner
+    {}, -- Right side
+    {}, -- Bottom right corner
+    {}, -- Bottom side
+    {}, -- Bottom left corner
+    {}, -- Left side
+  },
   width = 0.8,
   height = 0.8,
   cmd = { 'gh', 'dash' },
@@ -33,6 +41,41 @@ function M.setup(user_config)
   end
 end
 
+local styles = {
+  single = {
+    { '╭', 'FloatBorder' },
+    { '─', 'FloatBorder' },
+    { '╮', 'FloatBorder' },
+    { '│', 'FloatBorder' },
+    { '╯', 'FloatBorder' },
+    { '─', 'FloatBorder' },
+    { '╰', 'FloatBorder' },
+    { '│', 'FloatBorder' },
+  },
+  double = {
+    { '╔', 'FloatBorder' },
+    { '═', 'FloatBorder' },
+    { '╗', 'FloatBorder' },
+    { '║', 'FloatBorder' },
+    { '╝', 'FloatBorder' },
+    { '═', 'FloatBorder' },
+    { '╚', 'FloatBorder' },
+    { '║', 'FloatBorder' },
+  },
+  square = {
+    { '┌', 'FloatBorder' },
+    { '─', 'FloatBorder' },
+    { '┐', 'FloatBorder' },
+    { '│', 'FloatBorder' },
+    { '┘', 'FloatBorder' },
+    { '─', 'FloatBorder' },
+    { '└', 'FloatBorder' },
+    { '│', 'FloatBorder' },
+  },
+  custom = config.custom_border,
+  none = nil,
+}
+
 -- Create a floating window displaying the gh_dash buffer
 local function open_window()
   -- compute dimensions and position
@@ -43,40 +86,11 @@ local function open_window()
   -- resolve border style (string or table)
   local border = config.border
   if type(border) == 'string' then
-    local styles = {
-      single = {
-        { '╭', 'FloatBorder' },
-        { '─', 'FloatBorder' },
-        { '╮', 'FloatBorder' },
-        { '│', 'FloatBorder' },
-        { '╯', 'FloatBorder' },
-        { '─', 'FloatBorder' },
-        { '╰', 'FloatBorder' },
-        { '│', 'FloatBorder' },
-      },
-      double = {
-        { '╔', 'FloatBorder' },
-        { '═', 'FloatBorder' },
-        { '╗', 'FloatBorder' },
-        { '║', 'FloatBorder' },
-        { '╝', 'FloatBorder' },
-        { '═', 'FloatBorder' },
-        { '╚', 'FloatBorder' },
-        { '║', 'FloatBorder' },
-      },
-      square = {
-        { '┌', 'FloatBorder' },
-        { '─', 'FloatBorder' },
-        { '┐', 'FloatBorder' },
-        { '│', 'FloatBorder' },
-        { '┘', 'FloatBorder' },
-        { '─', 'FloatBorder' },
-        { '└', 'FloatBorder' },
-        { '│', 'FloatBorder' },
-      },
-      none = nil,
-    }
-    border = styles[border] or styles.single
+    if border == 'none' then
+      border = 'none'
+    else
+      border = styles[border] or styles.single
+    end
   end
   -- open floating window
   state.win = vim.api.nvim_open_win(state.buf, true, {
@@ -95,16 +109,22 @@ function M.open()
     vim.api.nvim_set_current_win(state.win)
     return
   end
-  if not state.buf or not vim.api.nvim_buf_is_valid(state.buf) then
+  if not state.buf or not vim.api.nvim_buf_is_valid(state.buf) or vim.api.nvim_buf_get_option(state.buf, 'modified') then
     -- create an unlisted scratch buffer for the terminal
     state.buf = vim.api.nvim_create_buf(false, false)
     -- buffer options
     vim.api.nvim_buf_set_option(state.buf, 'bufhidden', 'hide')
     vim.api.nvim_buf_set_option(state.buf, 'swapfile', false)
     vim.api.nvim_buf_set_option(state.buf, 'filetype', 'gh_dash')
-    -- map <Esc> in terminal and normal modes to close the gh_dash window
-    vim.api.nvim_buf_set_keymap(state.buf, 't', '<Esc>', [[<C-\><C-n><cmd>lua require('gh_dash').close()<CR>]], { noremap = true, silent = true })
-    vim.api.nvim_buf_set_keymap(state.buf, 'n', '<Esc>', [[<cmd>lua require('gh_dash').close()<CR>]], { noremap = true, silent = true })
+    -- Escape backgrounds the window cleanly
+    -- Map <Esc> in terminal mode to hide the popup
+    vim.api.nvim_buf_set_keymap(
+      state.buf,
+      't',
+      '<Esc>',
+      [[<C-\><C-n><cmd>lua vim.defer_fn(function() require('gh_dash').toggle() end, 10)<CR>]],
+      { noremap = true, silent = true }
+    )
   end
   open_window()
   -- determine if config.cmd is a simple executable name (no args) for checking
@@ -120,40 +140,34 @@ function M.open()
   -- if simple command and not found, handle auto-install or notify
   if check_cmd and vim.fn.executable(check_cmd) == 0 then
     if config.autoinstall then
-      if vim.fn.executable 'npm' == 1 then
+      if vim.fn.executable 'gh' == 1 then
         -- install via npm in the floating terminal to show output
         do
           local shell_cmd = vim.o.shell or 'sh'
           local cmd = {
             shell_cmd,
             '-c',
-            "echo 'Autoinstalling OpenAI gh_dash via npm...'; npm install -g @openai/gh_dash",
+            "echo 'Autoinstalling gh_dash via gh CLI extensions...'; gh extension install dlvhdr/gh-dash",
           }
           state.job = vim.fn.termopen(cmd, {
             cwd = vim.loop.cwd(),
-            on_exit = function(_, exit_code)
+            on_exit = function(_, exit_code, _)
+              state.job = nil
               if exit_code == 0 then
-                vim.notify('[gh_dash.nvim] gh_dash CLI installed successfully', vim.log.levels.INFO)
-                -- automatically re-launch gh_dash CLI now that it's installed
                 vim.schedule(function()
                   M.close()
-                  state.buf = nil
-                  M.open()
                 end)
-              else
-                vim.notify('[gh_dash.nvim] failed to install gh_dash CLI', vim.log.levels.ERROR)
               end
-              state.job = nil
             end,
           })
         end
       else
         -- show installation instructions in the gh_dash popup
         local msg = {
-          'npm not found; cannot auto-install gh_dash CLI.',
+          'gh CLI not found; cannot auto-install gh_dash extension.',
           '',
-          'Please install via your system package manager, or manually run:',
-          '  npm install -g @openai/gh_dash',
+          'Please install the gh CLI via your system package manager',
+          'i.e. `brew install gh`',
         }
         vim.api.nvim_buf_set_lines(state.buf, 0, -1, false, msg)
       end
@@ -163,7 +177,7 @@ function M.open()
         'gh_dash CLI not found.',
         '',
         'Install with:',
-        '  npm install -g @openai/gh_dash',
+        'gh extension install dlvhdr/gh-dash',
         '',
         'Or enable autoinstall in your plugin setup:',
         '  require("gh_dash").setup{ autoinstall = true }',
@@ -175,9 +189,14 @@ function M.open()
   -- spawn the gh_dash CLI in the floating terminal buffer
   if not state.job then
     state.job = vim.fn.termopen(config.cmd, {
-      cwd = vim.loop.cwd(),
-      on_exit = function()
+      wd = vim.loop.cwd(),
+      on_exit = function(_, exit_code, _)
         state.job = nil
+        if exit_code == 0 then
+          vim.schedule(function()
+            M.close()
+          end)
+        end
       end,
     })
   end
@@ -188,12 +207,22 @@ function M.close()
     vim.api.nvim_win_close(state.win, true)
     state.win = nil
   end
+  if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+    vim.api.nvim_buf_delete(state.buf, { force = true })
+    state.buf = nil
+  end
 end
 
 function M.toggle()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
-    M.close()
+    -- HIDE the window (don't kill the job)
+    vim.api.nvim_win_close(state.win, true)
+    state.win = nil
+  elseif state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+    -- Reopen window into existing buffer
+    open_window()
   else
+    -- Full open if everything is gone
     M.open()
   end
 end
@@ -218,7 +247,7 @@ function M.status()
       return M.statusline() ~= ''
     end,
     -- gear icon
-    icon = '',
+    icon = '',
     -- default color (blue)
     color = { fg = '#51afef' },
   }
